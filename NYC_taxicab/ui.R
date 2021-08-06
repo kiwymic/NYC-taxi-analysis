@@ -1,37 +1,28 @@
-fluidPage(
-  # h1("NYC Flights"),
-  # img(src="https://upload.wikimedia.org/wikipedia/commons/9/91/Palestine_sunbird_%28Cinnyris_osea_osea%29_male.jpg", width="50%"),
-  # HTML('<img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Palestine_sunbird_%28Cinnyris_osea_osea%29_male.jpg" width="60%">'),
-  # img(src="NYCDSA.png",width="20%")
-  
-  titlePanel("NYC Flights"),
-  sidebarLayout(
-    sidebarPanel(
-      selectizeInput(inputId = "origin_ui",
-                     label = "Departure airport",
-                     choices = unique(flights$origin)),
-      selectizeInput(inputId = "dest_ui",
-                     label = "Arrival airport",
-                     choices = unique(flights$dest)),
-      selectizeInput(inputId= "month",
-                     label ="Choose month",
-                     choices = unique(flights$month))
-    ),
-    mainPanel(
-      # fluidRow(
-      #   column(5,plotOutput("count")),
-      #   column(7,plotOutput("delay"))
-      # )
-      tabsetPanel(
-        tabPanel("plots",
-                 fluidRow(
-                   column(5,plotOutput("count")),
-                   column(7,plotOutput("delay"))
-                 )
+library(shinydashboard)
+dashboardPage(
+    dashboardHeader(title='NYC Flights'),
+    dashboardSidebar(
+        sidebarUserPanel("NYC DSA",
+                         image = 'nycdsa.jpg' ),
+        sidebarMenu(
+            menuItem("Plots", tabName = "plots", icon = icon("map")),
+            menuItem("Data", tabName = "data", icon = icon("database"))
         ),
-        tabPanel("table",
-                 tableOutput("table1"))
-      )
-    ) 
-  )
+        
+        selectizeInput(inputId='origin',label='Departure Airport',
+                       choices=unique(flights$origin)),
+        selectizeInput("dest", "Arrival Airport",
+                       choices=unique(flights$dest))
+    ),
+    dashboardBody(
+        tabItems(
+            tabItem(tabName = 'plots',
+                    fluidRow(
+                        leafletOutput("mymap"),
+                        # column(5, plotOutput("count")),
+                        # column(7, plotOutput("delay"))
+                    )),
+            tabItem(tabName = 'data', dataTableOutput('table'))
+        )
+    )
 )
