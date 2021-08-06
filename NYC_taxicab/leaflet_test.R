@@ -20,14 +20,22 @@ data_cleaning = function(df){
   # Rate code id is a number from 1 to 6.
   # Some fares also looked weird. Currently, we remove the fares which are
   # free and above $300 (this might not be a good idea, though).
+  
+  # Also need to filter out the data with unreasonable duration.
+  # Here, we call it unreasonable when...
+  #   1. It's too speedy (usually when the timer has error and is too short)
+  #   2. It takes too long and is too slow
+  #      (Maybe the driver forgot to reset the timer!)
   df <- df %>% filter(pickup_longitude > -75 & pickup_longitude < -71.5 &
                       dropoff_longitude > -75 & dropoff_longitude < -71.5 &
                       pickup_latitude > 40 & pickup_latitude < 41.7 &
                       dropoff_latitude > 40 & dropoff_latitude < 41.7) %>%
     filter(trip_distance > 0.1 & trip_distance < 300 &
              RatecodeID > 0 & RatecodeID < 6 &
-             total_amount <= 300 & total_amount >= 0.01) %>%
-    filter(duration > 0)
+             total_amount <= 300 & total_amount >= 0.01 &
+             passenger_count > 0) %>%
+    filter(duration > 0 &
+             speed < 0.025 & (duration < 10800 | speed > 0.004))
   return(df)
 }
 
@@ -35,7 +43,8 @@ data_processing = function(df){
   # Restructure the date/time
   df <- df %>% mutate(tpep_pickup_datetime = ymd_hms(tpep_pickup_datetime),
                     tpep_dropoff_datetime = ymd_hms(tpep_dropoff_datetime),
-                    duration = tpep_dropoff_datetime - tpep_pickup_datetime)
+                    duration = tpep_dropoff_datetime - tpep_pickup_datetime,
+                    speed = trip_distance/as.numeric(duration))
   # Add duration.
   return(df)
 }
@@ -48,8 +57,8 @@ trip$dropoff_latitude = as.numeric(as.character(trip$dropoff_latitude))
 
 trip$total_amount = as.numeric(as.character(trip$total_amount))
 
+trip = data_processing(trip)
 trip = data_cleaning(trip)
-temp = data_processing(trip)
 
 test.df <- trip %>% head(10000) %>%
   select(lng = pickup_longitude, lat = pickup_latitude) 
