@@ -1,33 +1,37 @@
-#
-# This is the user-interface definition of a Shiny web application. You can
-# run the application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-
-library(shiny)
-
-# Define UI for application that draws a histogram
-shinyUI(fluidPage(
-
-    # Application title
-    titlePanel("Old Faithful Geyser Data"),
-
-    # Sidebar with a slider input for number of bins
-    sidebarLayout(
-        sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
+fluidPage(
+  # h1("NYC Flights"),
+  # img(src="https://upload.wikimedia.org/wikipedia/commons/9/91/Palestine_sunbird_%28Cinnyris_osea_osea%29_male.jpg", width="50%"),
+  # HTML('<img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Palestine_sunbird_%28Cinnyris_osea_osea%29_male.jpg" width="60%">'),
+  # img(src="NYCDSA.png",width="20%")
+  
+  titlePanel("NYC Flights"),
+  sidebarLayout(
+    sidebarPanel(
+      selectizeInput(inputId = "origin_ui",
+                     label = "Departure airport",
+                     choices = unique(flights$origin)),
+      selectizeInput(inputId = "dest_ui",
+                     label = "Arrival airport",
+                     choices = unique(flights$dest)),
+      selectizeInput(inputId= "month",
+                     label ="Choose month",
+                     choices = unique(flights$month))
+    ),
+    mainPanel(
+      # fluidRow(
+      #   column(5,plotOutput("count")),
+      #   column(7,plotOutput("delay"))
+      # )
+      tabsetPanel(
+        tabPanel("plots",
+                 fluidRow(
+                   column(5,plotOutput("count")),
+                   column(7,plotOutput("delay"))
+                 )
         ),
-
-        # Show a plot of the generated distribution
-        mainPanel(
-            plotOutput("distPlot")
-        )
-    )
-))
+        tabPanel("table",
+                 tableOutput("table1"))
+      )
+    ) 
+  )
+)

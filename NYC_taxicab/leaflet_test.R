@@ -1,5 +1,7 @@
 library(leaflet)
 library(dplyr)
+library(lubridate)
+library(ggplot2)
 
 data_cleaning = function(df){
   # Do some things to kill the data we do not like.
@@ -9,11 +11,32 @@ data_cleaning = function(df){
   df$dropoff_latitude = as.numeric(as.character(df$dropoff_latitude))
   
   # Delete data with longitude/latitude = 0.00
-  # Even more, we restrict our data to those aroung NYC.
+  # Even more, we restrict our data to those around NYC.
+  
+  # Some trips have distance = 0. We will eliminate those.
+  # The longest trip has distance > 1 million miles. This is not reasonable
+  # as well.
+  
+  # Rate code id is a number from 1 to 6.
+  # Some fares also looked weird. Currently, we remove the fares which are
+  # free and above $300 (this might not be a good idea, though).
   df <- df %>% filter(pickup_longitude > -75 & pickup_longitude < -71.5 &
                       dropoff_longitude > -75 & dropoff_longitude < -71.5 &
                       pickup_latitude > 40 & pickup_latitude < 41.7 &
-                      dropoff_latitude > 40 & dropoff_latitude < 41.7)
+                      dropoff_latitude > 40 & dropoff_latitude < 41.7) %>%
+    filter(trip_distance > 0.1 & trip_distance < 300 &
+             RatecodeID > 0 & RatecodeID < 6 &
+             total_amount <= 300 & total_amount >= 0.01) %>%
+    filter(duration > 0)
+  return(df)
+}
+
+data_processing = function(df){
+  # Restructure the date/time
+  df <- df %>% mutate(tpep_pickup_datetime = ymd_hms(tpep_pickup_datetime),
+                    tpep_dropoff_datetime = ymd_hms(tpep_dropoff_datetime),
+                    duration = tpep_dropoff_datetime - tpep_pickup_datetime)
+  # Add duration.
   return(df)
 }
 
@@ -23,7 +46,10 @@ trip$pickup_latitude = as.numeric(as.character(trip$pickup_latitude))
 trip$dropoff_longitude = as.numeric(as.character(trip$dropoff_longitude))
 trip$dropoff_latitude = as.numeric(as.character(trip$dropoff_latitude))
 
-trip2 = data_cleaning(trip)
+trip$total_amount = as.numeric(as.character(trip$total_amount))
+
+trip = data_cleaning(trip)
+temp = data_processing(trip)
 
 test.df <- trip %>% head(10000) %>%
   select(lng = pickup_longitude, lat = pickup_latitude) 
@@ -40,3 +66,11 @@ m <- leaflet() %>%
   addCircles(data = test2.df, weight = 0, color = "green")
 
 m
+
+trip %>% arrange(desc(total_amount))
+
+# Goal: Find a strategy to maximize profit for a taxi driver.
+# Questions to ask:
+
+# 1. Data exploration.
+# 
