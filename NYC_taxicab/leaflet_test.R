@@ -2,6 +2,8 @@ library(leaflet)
 library(dplyr)
 library(lubridate)
 library(ggplot2)
+library(sf)
+library(rgdal)
 
 data_cleaning = function(df){
   # Do some things to kill the data we do not like.
@@ -9,6 +11,8 @@ data_cleaning = function(df){
   df$pickup_latitude = as.numeric(as.character(df$pickup_latitude))
   df$dropoff_longitude = as.numeric(as.character(df$dropoff_longitude))
   df$dropoff_latitude = as.numeric(as.character(df$dropoff_latitude))
+  
+  df$total_amount = as.numeric(as.character(df$total_amount))
   
   # Delete data with longitude/latitude = 0.00
   # Even more, we restrict our data to those around NYC.
@@ -49,34 +53,35 @@ data_processing = function(df){
   return(df)
 }
 
+# Loading the ride data
 trip = read.csv("./NYC_taxicab/y1.csv")
-trip$pickup_longitude = as.numeric(as.character(trip$pickup_longitude))
-trip$pickup_latitude = as.numeric(as.character(trip$pickup_latitude))
-trip$dropoff_longitude = as.numeric(as.character(trip$dropoff_longitude))
-trip$dropoff_latitude = as.numeric(as.character(trip$dropoff_latitude))
 
-trip$total_amount = as.numeric(as.character(trip$total_amount))
-
+# You must process before you clean. Otherwise, you die.
 trip = data_processing(trip)
 trip = data_cleaning(trip)
+
+# Loading the zone map from NYC. The projection in that file is in
+# EPSG:2908 (whatever it is).
+# The Leaflet library only understand EPSG:4326
+# (your daily friendly lat/lon), so you need to translate it.
+ny_areas <- st_read("./NYC_taxicab/taxi_zones.shp") %>%
+  st_transform(crs = 4326)
 
 test.df <- trip %>% head(10000) %>%
   select(lng = pickup_longitude, lat = pickup_latitude) 
 test2.df <- trip %>% head(10000) %>%
   select(lng = dropoff_longitude, lat = dropoff_latitude) 
 
-m <- leaflet() %>% 
+m <- leaflet(ny_areas) %>% addPolygons(color = "#004499", weight = 1,
+      smoothFactor = 0.5, opacity = 1.0, fillOpacity = 0.3) %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
-  # addTiles() %>% 
-  # setView( lng = -74.0025225, lat = 40.7509353, zoom = 14 ) %>% 
-  setView( lng = -73.7, lat = 40.84, zoom = 8 ) %>%
-  # addProviderTiles("Esri.WorldImagery") %>%
-  addCircles(data = test.df, weight = 0, color = "red") %>%
-  addCircles(data = test2.df, weight = 0, color = "green")
-
+  setView( lng = -74.0, lat = 40.74, zoom = 10 ) %>%
+  addCircles(data = test.df, weight = 0, color = "red") #%>%
+  # addCircles(data = test2.df, weight = 0, color = "green")
+  
 m
 
-trip %>% arrange(desc(total_amount))
+# trip %>% arrange(desc(total_amount))
 
 # Goal: Find a strategy to maximize profit for a taxi driver.
 # Questions to ask:
