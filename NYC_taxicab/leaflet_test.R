@@ -105,16 +105,18 @@ distance_processing_nv = function(df){
   return(cbind(df, df_patch))
 }
 # A few noticeable zones:
-# Airport: EWR = 1, JFK = 132, LGA = 138
+# Airport: EWR = 1, JFK = 132, LGA = 138, central park = 43
 
-temp = trip[10001:20000,]
+temp = trip[50001:60000,] #51444-61752
+temp[1,"X"]
+temp[10000,"X"]
 ptm <- proc.time()
 temp = distance_processing_nv(temp)
 proc.time() - ptm
 # 0.3-0.4s per entry... desperate
 
-# write.csv(temp %>% select(-1), "y1_00001-10000.csv", row.names = T)
-write.csv(temp , "y1_00001-10000_cp.csv", row.names = T)
+write.csv(temp %>% select(-1), "y1_50001-60000.csv", row.names = T)
+# write.csv(test %>% select(-1,-2) , "y1_10001-20000.csv", row.names = T)
 
 # Loading the ride data
 trip = read.csv("./NYC_taxicab/y1.csv")
@@ -138,10 +140,11 @@ test2.df <- trip %>% head(10000) %>%
 
 m <- leaflet(ny_areas) %>% addPolygons(color = "#004499", weight = 1,
       smoothFactor = 0.5, opacity = 1.0, fillOpacity = 0.3) %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%
-  setView( lng = -74.0, lat = 40.74, zoom = 10 ) %>%
+  #addProviderTiles(providers$CartoDB.Positron) %>%
+  addProviderTiles(providers$GeoportailFrance.orthos) %>%
+  setView( lng = -74.0, lat = 40.74, zoom = 10 )
   # addCircles(data = test.df, weight = 0, color = "red") #%>%
-  addCircles(data = test2.df, weight = 0, color = "green")
+  # addCircles(data = test2.df, weight = 0, color = "green")
   
 m
 
