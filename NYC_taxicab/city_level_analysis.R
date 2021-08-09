@@ -8,10 +8,12 @@ aggregate_start = ymd_hms("2016/01/01 00:00:00")
 aggregate_end = ymd_hms("2016/01/28 23:59:59")
 
 # Read and aggregate all cvs files again
-num_files = 38 # Update whenever a new file is converted.
+num_files = 65 # Update whenever a new file is converted.
 
 ######################################################
 azimuth = function(lon1, lat1, lon2, lat2){
+  # Returns the azimuth on two gps coordinates, start at 1, ends at 2.
+  # 0 degree = point north, clockwise augmenting
   rlon1 = lon1 * pi / 180
   rlat1 = lat1 * pi / 180
   rlon2 = lon2 * pi / 180
@@ -112,8 +114,8 @@ g <- ggplot(data = trip, aes(x=hr))+
 g
 
 g <- ggplot(data = trip, aes(x=hr))+
-  geom_density(aes(color=dow)) + # , stat="identity"
-  labs(x = "Time of the day", y = "Data count") + facet_wrap(~ dow)
+  geom_density(aes(color=as.factor(dow))) + # , stat="identity"
+  labs(x = "Time of the day", y = "Data count")
 g
 
 # 2. What are the most popular pickup/dropoff regions?
