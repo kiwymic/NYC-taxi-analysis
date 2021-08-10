@@ -7,6 +7,8 @@ library(shiny)
 library(dplyr)
 library(ggplot2)
 library(tidyr)
+library(sf)
+
 flights <- fread(file = "./flights14.csv")
 
 # Setting up the shape file.
@@ -28,7 +30,7 @@ aggregate_start = ymd_hms("2016/01/01 00:00:00")
 aggregate_end = ymd_hms("2016/01/28 23:59:59")
 
 # Read and aggregate all cvs files again
-num_files = 3 # Update whenever a new file is converted.
+num_files = 106 # Update whenever a new file is converted.
 
 ######################################################
 azimuth = function(lon1, lat1, lon2, lat2){

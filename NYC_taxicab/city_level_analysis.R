@@ -216,7 +216,8 @@ g <- ggplot(data = trip, aes(x=trip_distance))+
 g
 
 g <- ggplot(data = trip, aes(x=as.factor(dow), y=trip_distance))+
-  geom_boxplot(aes(fill=dow)) + coord_cartesian(ylim=c(0,8)) + 
+  geom_violin(aes(fill=as.factor(dow))) +
+  geom_boxplot(width=0.1, alpha=0.4, outlier.shape = NA) + coord_cartesian(ylim=c(0,8)) + 
   labs(x = "Day of week", y = "Distancee traveled (miles)")
 g
 
@@ -228,7 +229,8 @@ g <- ggplot(data = trip, aes(x=hourly_wage))+
 g
 
 g <- ggplot(data = trip, aes(x=as.factor(dow), y=hourly_wage))+
-  geom_boxplot(aes(fill=dow)) + coord_cartesian(ylim=c(0,150)) + 
+  geom_violin(aes(fill=as.factor(dow))) +
+  geom_boxplot(width=0.1, alpha=0.4, outlier.shape = NA) + coord_cartesian(ylim=c(0,150)) + 
   labs(x = "Day of week", y = "Hourly wage")
 g
 
@@ -241,11 +243,13 @@ g
 
 # 5. Travelling in Manhattan
 temp <- trip %>% filter(pickup_boro=="Manhattan" &
-                          dropoff_boro=="Manhattan" & hourly_wage < 200)
-g <- ggplot(data = temp, aes(x=earth_distance,
+                          dropoff_boro=="Manhattan" & hourly_wage < 200
+                        & hr >= 16 & hr <= 18)
+g <- ggplot(data = temp, aes(x=trip_distance,
                              y=azimuth))+
-  geom_point(aes(color=hourly_wage)) + 
-  labs(x = "Teleport distance", y = "Azimuth") # + facet_wrap(~ dow)
+  geom_point(aes(color=hourly_wage), alpha=0.1) + 
+  scale_colour_gradientn(colours=rainbow(4)) + 
+  labs(x = "Travel distance", y = "Azimuth") # + facet_wrap(~ dow)
 g
 
 # 6. A baseline comparison: Traveling to and from JFK
@@ -260,7 +264,7 @@ g <- ggplot(data = temp, aes(x=fare_amount))+
 ggplotly(g, tooltip="text")
 
 g <- ggplot(data = temp, aes(x=trip_distance, y=hourly_wage)) +
-  geom_point(aes(color=hourly_wage)) + 
+  geom_point(aes(color=hourly_wage), alpha = 0.05) + 
   labs(x = "Trip distance", y = "Hourly wage") +
   coord_cartesian(xlim=c(0,50)) + 
   geom_density2d()
@@ -271,7 +275,8 @@ temp_wage <- temp %>% mutate(other_zone =
                   ifelse(pickup_zone==132, dropoff_zone, pickup_zone)) %>%
   group_by(other_zone) %>% summarize(avg = mean(hourly_wage))
 
-pal <- colorBin("YlOrRd", domain = temp_wage$avg)
+# pal <- colorBin("YlOrRd", domain = temp_wage$avg)
+pal <- colorBin("YlOrRd", domain = c(60,160))
 m <- leaflet(ny_areas %>% filter(OBJECTID %in% temp_wage$other_zone)) %>%
 addPolygons(fillColor = ~pal(temp_wage$avg), weight = 1,
               smoothFactor = 0.5, opacity = 1.0, fillOpacity = 0.5) %>%                                                                             
