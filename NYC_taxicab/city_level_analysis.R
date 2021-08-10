@@ -363,3 +363,19 @@ m
 # 12    12 35778
 # 13    13 38494
 # 14    14 38653
+
+# compute the total duration
+trip %>% filter(dow==5, hr==8) %>% summarise(mean(duration)) # 838.90
+838.90/0.4926 # Wait time = 1703s
+
+dim(trip)
+temp <- trip %>% filter(pickup_zone==232, dow==5, hr==8)
+
+temp %>% mutate(duration2 = duration + 1703, hourly_wage2 = in_pocket/duration2*3600) %>% summarize(avg=mean(hourly_wage2))
+# 20.17
+temp %>% summarize(mean(duration)) # 955.75
+
+temp2 <- trip %>% filter(dow==5, hr==8)
+temp3 <- temp2 %>% mutate(duration2 = duration + 1703, hourly_wage2 = in_pocket/duration2*3600) %>%
+  group_by(pickup_zone) %>% summarize(avg = mean(hourly_wage2))
+temp3 <- temp3 %>% arrange(desc(avg))

@@ -130,7 +130,7 @@ function(input,output){
             addProviderTiles(providers$CartoDB.Positron) %>%
             setView( lng = -74.0, lat = 40.74, zoom = 10 ) %>%
             addHeatmap(lng=trip_selected$longitude, lat=trip_selected$latitude,
-                       max=1, blur = 6, radius = 3, intensity = dim(trip)[1]/1e5/ND/NH)
+                       max=1, blur = 6, radius = 3, intensity = dim(trip)[1]/1e6/ND/NH)
     })
     
     output$zone_do_with_dow_tod_hm <- renderLeaflet({
@@ -154,7 +154,7 @@ function(input,output){
             addProviderTiles(providers$CartoDB.Positron) %>%
             setView( lng = -74.0, lat = 40.74, zoom = 10 ) %>%
             addHeatmap(lng=trip_selected$longitude, lat=trip_selected$latitude,
-                       max=1, blur = 6, radius = 3, intensity = dim(trip)[1]/1e5/ND/NH)
+                       max=1, blur = 6, radius = 3, intensity = dim(trip)[1]/1e6/ND/NH)
     })
     
     output$fare_dist <- renderPlot(
@@ -275,7 +275,7 @@ function(input,output){
     })
     
     output$revenue_do_zone <- renderLeaflet({
-        pal <- colorBin("PuBu", domain = c(60,160))
+        pal <- colorBin("PuBu", domain = c(20,200))
         dropoff_wage <- trip %>% group_by(dropoff_zone) %>%
             summarize(avg = mean(hourly_wage))
         
@@ -303,7 +303,7 @@ function(input,output){
         temp_wage <- trip_selected %>% group_by(dropoff_zone) %>%
             summarize(avg = mean(hourly_wage))
         
-        pal <- colorBin("YlOrRd", domain = c(60,200))
+        pal <- colorBin("YlOrRd", domain = c(20,200))
         
         leaflet(ny_areas %>% filter(OBJECTID %in% temp_wage$dropoff_zone)) %>%
             addPolygons(fillColor = ~pal(temp_wage$avg), weight = 1,
@@ -330,7 +330,7 @@ function(input,output){
         temp_wage <- trip_selected %>% group_by(dropoff_zone) %>%
             summarize(avg = mean(hourly_wage))
         
-        pal <- colorBin("YlOrRd", domain = c(60,200))
+        pal <- colorBin("YlOrRd", domain = c(20,200))
         
         leaflet(ny_areas %>% filter(OBJECTID %in% temp_wage$dropoff_zone)) %>%
             addPolygons(fillColor = ~pal(temp_wage$avg), weight = 1,
