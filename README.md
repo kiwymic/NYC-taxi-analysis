@@ -8,3 +8,6 @@ The file consists of the following files.
   - `city_level_analysis.R`: More feature processing, together with some EDA, which most of them are now in the app.
 2. The shiny R project related code
   - three files `ui.R`, `server.R`, `global.R` in the `NYC_taxicab` folder
+
+Google slides:
+https://docs.google.com/presentation/d/1UNt-xqy_nT826is2or8-V9ffrn70_ZEA3h0GhCEkklA/edit?usp=sharing
